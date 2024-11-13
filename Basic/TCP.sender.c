@@ -4,7 +4,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#define SERVER_IP "192.168.158.136"    // Server IP address
+#define SERVER_IP "192.168.56.47"    // Server IP address
 #define SERVER_PORT 8080         // Server port
 #define BUFFER_SIZE 1024
 

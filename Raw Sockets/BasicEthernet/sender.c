@@ -9,16 +9,16 @@
 #include <net/if.h>          // For network interface
 #include <sys/ioctl.h>       // For ioctl
 
-#define DEST_MAC0    0x08
-#define DEST_MAC1    0x00
-#define DEST_MAC2    0x27
-#define DEST_MAC3    0xcb
-#define DEST_MAC4    0x7e
-#define DEST_MAC5    0xf5
+#define DEST_MAC0    0x8e
+#define DEST_MAC1    0x8f
+#define DEST_MAC2    0x95
+#define DEST_MAC3    0x48
+#define DEST_MAC4    0xdc
+#define DEST_MAC5    0x06
 
 #define ETHER_TYPE   0x0800 // IPv4
 
-#define INTERFACE    "eth0" // Change this to the appropriate interface name
+#define INTERFACE    "wlan0" // Change this to the appropriate interface name
 
 int main() {
     int sock_raw;

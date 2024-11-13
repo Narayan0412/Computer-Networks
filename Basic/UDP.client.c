@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <fcntl.h>
 
 #define SOCKET_PATH "/tmp/uds_socket"
 
@@ -100,59 +99,49 @@ int send_fd(int socket, int fd_to_send)
 
 
 int main() {
-    int server_fd, client_fd;
+    int client_fd;
     struct sockaddr_un addr;
 
     // Create socket
-    server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (server_fd < 0) {
+    client_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (client_fd < 0) {
         perror("socket");
         exit(EXIT_FAILURE);
     }
 
-    // Remove any existing socket file
-    unlink(SOCKET_PATH);
-
-    // Bind the socket
+    // Set the socket address
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX;
     strncpy(addr.sun_path, SOCKET_PATH, sizeof(addr.sun_path) - 1);
 
-    if (bind(server_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-        perror("bind");
+    // Connect to the server
+    if (connect(client_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+        perror("connect");
         exit(EXIT_FAILURE);
     }
 
-    if (listen(server_fd, 5) < 0) {
-        perror("listen");
+    printf("Connected to server, receiving file descriptor...\n");
+
+    // Receive the file descriptor
+    int received_fd = recv_fd(client_fd);
+    if (received_fd < 0) {
+        printf("Failed to receive file descriptor\n");
+        close(client_fd);
         exit(EXIT_FAILURE);
     }
 
-    printf("Server waiting for connection...\n");
+    printf("Received file descriptor: %d\n", received_fd);
 
-    // Accept a client connection
-    client_fd = accept(server_fd, NULL, NULL);
-    if (client_fd < 0) {
-        perror("accept");
-        exit(EXIT_FAILURE);
+    // Read from the received file descriptor
+    char buffer[128];
+    int bytes_read = read(received_fd, buffer, sizeof(buffer) - 1);
+    if (bytes_read > 0) {
+        buffer[bytes_read] = '\0';
+        printf("Data from received FD: %s\n", buffer);
     }
 
-    printf("Client connected, sending file descriptor...\n");
-
-    // Open the file to send
-    int fd_to_send = open("test.txt", O_RDONLY);
-    if (fd_to_send < 0) {
-        perror("open");
-        exit(EXIT_FAILURE);
-    }
-
-    // Send the file descriptor
-    send_fd(client_fd, fd_to_send);
-
-    close(fd_to_send);
+    close(received_fd);
     close(client_fd);
-    close(server_fd);
-    unlink(SOCKET_PATH);
 
     return 0;
 }

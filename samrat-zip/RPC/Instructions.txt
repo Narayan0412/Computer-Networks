@@ -1,0 +1,14 @@
+
+=) sudo apt install libntirpc-dev
+
+
+
+1) rpcgen -a -C add.x
+		-C =>create all ncc structured files
+		
+		
+		
+		
+		
+		
+		
